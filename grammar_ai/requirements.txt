@@ -1,0 +1,7 @@
+torch
+transformers
+sentencepiece
+requests
+python-dotenv
+flask
+gunicorn
