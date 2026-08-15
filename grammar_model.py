@@ -7,32 +7,55 @@ from transformers import (
     T5ForConditionalGeneration
 )
 
-
 # ============================================================
-# MODEL
+# CONFIGURATION
 # ============================================================
 
 MODEL_NAME = "rajnarayansingh26/grammar-corrector"
 
-DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available() else "cpu"
-)
+# Render deployment = CPU
+DEVICE = torch.device("cpu")
 
-print("Loading Grammar AI...")
+# Keep input/output small to reduce RAM usage
+MAX_INPUT_LENGTH = 128
+MAX_OUTPUT_LENGTH = 128
 
-tokenizer = T5Tokenizer.from_pretrained(
-    MODEL_NAME
-)
+# Model objects are loaded only when needed
+tokenizer = None
+model = None
 
-model = T5ForConditionalGeneration.from_pretrained(
-    MODEL_NAME
-)
 
-model.to(DEVICE)
+# ============================================================
+# LOAD MODEL
+# ============================================================
 
-model.eval()
+def load_model():
 
-print(f"Model loaded on {DEVICE}")
+    global tokenizer
+    global model
+
+    if tokenizer is not None and model is not None:
+        return
+
+    print("Loading Grammar AI...")
+
+    # Explicitly request the SentencePiece tokenizer
+    tokenizer = T5Tokenizer.from_pretrained(
+        MODEL_NAME,
+        legacy=True,
+        use_fast=False
+    )
+
+    model = T5ForConditionalGeneration.from_pretrained(
+        MODEL_NAME,
+        low_cpu_mem_usage=True
+    )
+
+    model.to(DEVICE)
+
+    model.eval()
+
+    print("Grammar AI loaded successfully on CPU")
 
 
 # ============================================================
@@ -41,7 +64,10 @@ print(f"Model loaded on {DEVICE}")
 
 def preprocess_text(text):
 
-    text = text.strip()
+    if not text:
+        return ""
+
+    text = str(text).strip()
 
     text = re.sub(
         r"\s+",
@@ -53,7 +79,7 @@ def preprocess_text(text):
 
 
 # ============================================================
-# SPLIT PARAGRAPH INTO SENTENCES
+# SPLIT PARAGRAPH
 # ============================================================
 
 def split_sentences(text):
@@ -76,22 +102,19 @@ def split_sentences(text):
 
 def correct_sentence(sentence):
 
-    sentence = preprocess_text(
-        sentence
-    )
+    load_model()
+
+    sentence = preprocess_text(sentence)
 
     if not sentence:
         return ""
 
-    input_text = (
-        "grammar: " +
-        sentence
-    )
+    input_text = "grammar: " + sentence
 
     inputs = tokenizer(
         input_text,
         return_tensors="pt",
-        max_length=128,
+        max_length=MAX_INPUT_LENGTH,
         truncation=True
     )
 
@@ -103,15 +126,11 @@ def correct_sentence(sentence):
     with torch.no_grad():
 
         outputs = model.generate(
-
             **inputs,
-
-            max_length=128,
-
-            num_beams=3,
-
+            max_length=MAX_OUTPUT_LENGTH,
+            num_beams=2,
+            do_sample=False,
             no_repeat_ngram_size=2,
-
             early_stopping=True
         )
 
@@ -119,6 +138,10 @@ def correct_sentence(sentence):
         outputs[0],
         skip_special_tokens=True
     )
+
+    # Delete temporary tensors
+    del inputs
+    del outputs
 
     return corrected.strip()
 
@@ -134,9 +157,7 @@ def correct_grammar(text):
     if not text:
         return ""
 
-    sentences = split_sentences(
-        text
-    )
+    sentences = split_sentences(text)
 
     corrected_sentences = []
 
@@ -150,10 +171,6 @@ def correct_grammar(text):
             corrected_sentences.append(
                 corrected
             )
-
-        # Free unused GPU memory if applicable
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
 
     return " ".join(
         corrected_sentences
@@ -264,6 +281,15 @@ def analyze_grammar(text):
     text = preprocess_text(
         text
     )
+
+    if not text:
+        return {
+            "original": "",
+            "corrected": "",
+            "changes": [],
+            "similarity": 100.0,
+            "changed": False
+        }
 
     corrected = correct_grammar(
         text
