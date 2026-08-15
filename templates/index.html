@@ -1,0 +1,1137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Grammar AI</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5f7fa,
+                    #e4ecf7
+                );
+
+            min-height: 100vh;
+
+            color: #222;
+
+        }
+
+
+        .container {
+
+            width: 90%;
+
+            max-width: 1100px;
+
+            margin:
+                40px auto;
+
+        }
+
+
+        /* ==================================================
+           HEADER
+           ================================================== */
+
+        header {
+
+            text-align: center;
+
+            margin-bottom: 35px;
+
+        }
+
+
+        header h1 {
+
+            font-size: 42px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        header p {
+
+            color: #666;
+
+            font-size: 17px;
+
+        }
+
+
+        /* ==================================================
+           INPUT CARD
+           ================================================== */
+
+        .input-card {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 25px;
+
+        }
+
+
+        textarea {
+
+            width: 100%;
+
+            min-height: 150px;
+
+            resize: vertical;
+
+            padding: 18px;
+
+            border: 1px solid #ddd;
+
+            border-radius: 10px;
+
+            font-size: 18px;
+
+            outline: none;
+
+        }
+
+
+        textarea:focus {
+
+            border-color: #555;
+
+        }
+
+
+        .button-row {
+
+            margin-top: 15px;
+
+            display: flex;
+
+            gap: 10px;
+
+        }
+
+
+        button {
+
+            border: none;
+
+            padding:
+                13px 25px;
+
+            border-radius: 8px;
+
+            font-size: 16px;
+
+            cursor: pointer;
+
+        }
+
+
+        #analyzeBtn {
+
+            background: #222;
+
+            color: white;
+
+        }
+
+
+        #clearBtn {
+
+            background: #eee;
+
+            color: #222;
+
+        }
+
+
+        button:hover {
+
+            opacity: 0.85;
+
+        }
+
+
+        /* ==================================================
+           LOADING
+           ================================================== */
+
+        #loading {
+
+            display: none;
+
+            text-align: center;
+
+            padding: 20px;
+
+        }
+
+
+        .spinner {
+
+            width: 35px;
+
+            height: 35px;
+
+            border: 4px solid #ddd;
+
+            border-top:
+                4px solid #222;
+
+            border-radius: 50%;
+
+            animation:
+                spin 1s linear infinite;
+
+            margin:
+                auto auto 10px;
+
+        }
+
+
+        @keyframes spin {
+
+            100% {
+                transform:
+                    rotate(360deg);
+            }
+
+        }
+
+
+        /* ==================================================
+           RESULTS
+           ================================================== */
+
+        #results {
+
+            display: none;
+
+        }
+
+
+        .card {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0, 0, 0, 0.07);
+
+            margin-bottom: 20px;
+
+        }
+
+
+        .card h2 {
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .original {
+
+            background: #fff3f3;
+
+            padding: 15px;
+
+            border-radius: 8px;
+
+            font-size: 18px;
+
+        }
+
+
+        .corrected {
+
+            background: #f1fff4;
+
+            padding: 15px;
+
+            border-radius: 8px;
+
+            font-size: 18px;
+
+        }
+
+
+        /* ==================================================
+           CHANGES
+           ================================================== */
+
+        .change {
+
+            display: flex;
+
+            gap: 15px;
+
+            align-items: center;
+
+            padding: 12px;
+
+            margin-bottom: 10px;
+
+            background: #f7f7f7;
+
+            border-radius: 8px;
+
+        }
+
+
+        .old {
+
+            color: #c62828;
+
+            text-decoration:
+                line-through;
+
+            font-weight: bold;
+
+        }
+
+
+        .arrow {
+
+            font-size: 20px;
+
+        }
+
+
+        .new {
+
+            color: #2e7d32;
+
+            font-weight: bold;
+
+        }
+
+
+        /* ==================================================
+           SCORE
+           ================================================== */
+
+        .score {
+
+            font-size: 35px;
+
+            font-weight: bold;
+
+            margin-top: 10px;
+
+        }
+
+
+        /* ==================================================
+           WORD CARDS
+           ================================================== */
+
+        .word-card {
+
+            border:
+                1px solid #ddd;
+
+            border-radius: 10px;
+
+            padding: 20px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .word-title {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .section {
+
+            margin-top: 15px;
+
+        }
+
+
+        .section h4 {
+
+            margin-bottom: 8px;
+
+        }
+
+
+        .section ul {
+
+            padding-left: 20px;
+
+        }
+
+
+        .section li {
+
+            margin-bottom: 6px;
+
+        }
+
+
+        .error {
+
+            color: #c62828;
+
+            background: #fff3f3;
+
+            padding: 15px;
+
+            border-radius: 8px;
+
+            display: none;
+
+            margin-bottom: 20px;
+
+        }
+
+
+        footer {
+
+            text-align: center;
+
+            color: #777;
+
+            padding: 30px;
+
+        }
+
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- ==================================================
+         HEADER
+         ================================================== -->
+
+    <header>
+
+        <h1>Grammar AI</h1>
+
+        <p>
+            AI-powered grammar correction
+            with Oxford lexical analysis
+        </p>
+
+    </header>
+
+
+    <!-- ==================================================
+         INPUT
+         ================================================== -->
+
+    <div class="input-card">
+
+        <textarea
+            id="sentence"
+            placeholder="Enter an English sentence...
+
+Example:
+She go to school yesterday."
+        ></textarea>
+
+
+        <div class="button-row">
+
+            <button
+                id="analyzeBtn"
+                onclick="analyzeSentence()"
+            >
+                Analyze Grammar
+            </button>
+
+
+            <button
+                id="clearBtn"
+                onclick="clearAll()"
+            >
+                Clear
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         ERROR
+         ================================================== -->
+
+    <div
+        id="error"
+        class="error"
+    ></div>
+
+
+    <!-- ==================================================
+         LOADING
+         ================================================== -->
+
+    <div
+        id="loading"
+        class="card"
+    >
+
+        <div class="spinner"></div>
+
+        <p>
+            Grammar AI is analyzing your sentence...
+        </p>
+
+    </div>
+
+
+    <!-- ==================================================
+         RESULTS
+         ================================================== -->
+
+    <div id="results">
+
+
+        <!-- ORIGINAL -->
+
+        <div class="card">
+
+            <h2>
+                Original Sentence
+            </h2>
+
+            <div
+                id="original"
+                class="original"
+            ></div>
+
+        </div>
+
+
+        <!-- CORRECTED -->
+
+        <div class="card">
+
+            <h2>
+                Corrected Sentence
+            </h2>
+
+            <div
+                id="corrected"
+                class="corrected"
+            ></div>
+
+        </div>
+
+
+        <!-- SCORE -->
+
+        <div class="card">
+
+            <h2>
+                Similarity Score
+            </h2>
+
+            <div
+                id="score"
+                class="score"
+            ></div>
+
+        </div>
+
+
+        <!-- CHANGES -->
+
+        <div class="card">
+
+            <h2>
+                Detected Corrections
+            </h2>
+
+            <div id="changes"></div>
+
+        </div>
+
+
+        <!-- OXFORD -->
+
+        <div class="card">
+
+            <h2>
+                Oxford Word Analysis
+            </h2>
+
+            <div id="oxford"></div>
+
+        </div>
+
+
+    </div>
+
+
+    <footer>
+
+        Grammar AI • T5 + Oxford Dictionaries API
+
+    </footer>
+
+
+</div>
+
+
+<script>
+
+
+// ==========================================================
+// ANALYZE SENTENCE
+// ==========================================================
+
+async function analyzeSentence() {
+
+
+    const sentence =
+        document
+            .getElementById("sentence")
+            .value
+            .trim();
+
+
+    if (!sentence) {
+
+        showError(
+            "Please enter a sentence."
+        );
+
+        return;
+
+    }
+
+
+    hideError();
+
+    showLoading();
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/analyze",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            sentence:
+                                sentence
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        hideLoading();
+
+
+        if (!response.ok ||
+            !data.success) {
+
+            showError(
+                data.error ||
+                "Something went wrong."
+            );
+
+            return;
+
+        }
+
+
+        displayResults(data);
+
+
+    }
+
+    catch (error) {
+
+        hideLoading();
+
+        showError(
+            "Unable to connect to Grammar AI."
+        );
+
+        console.error(error);
+
+    }
+
+}
+
+
+// ==========================================================
+// DISPLAY RESULTS
+// ==========================================================
+
+function displayResults(data) {
+
+
+    document
+        .getElementById("results")
+        .style.display = "block";
+
+
+    document
+        .getElementById("original")
+        .innerText =
+            data.original;
+
+
+    document
+        .getElementById("corrected")
+        .innerText =
+            data.corrected;
+
+
+    document
+        .getElementById("score")
+        .innerText =
+            data.similarity + "%";
+
+
+    displayChanges(
+        data.changes
+    );
+
+
+    displayOxford(
+        data.oxford
+    );
+
+}
+
+
+// ==========================================================
+// DISPLAY CHANGES
+// ==========================================================
+
+function displayChanges(changes) {
+
+
+    const container =
+        document.getElementById(
+            "changes"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!changes ||
+        changes.length === 0) {
+
+        container.innerHTML =
+            "<p>No grammar corrections detected. ✓</p>";
+
+        return;
+
+    }
+
+
+    changes.forEach(change => {
+
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.className =
+            "change";
+
+
+        div.innerHTML = `
+
+            <span class="old">
+                ${escapeHtml(
+                    change.original
+                )}
+            </span>
+
+            <span class="arrow">
+                →
+            </span>
+
+            <span class="new">
+                ${escapeHtml(
+                    change.corrected
+                )}
+            </span>
+
+        `;
+
+
+        container.appendChild(div);
+
+    });
+
+}
+
+
+// ==========================================================
+// DISPLAY OXFORD DATA
+// ==========================================================
+
+function displayOxford(data) {
+
+
+    const container =
+        document.getElementById(
+            "oxford"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!data ||
+        Object.keys(data).length === 0) {
+
+        container.innerHTML =
+            "<p>No additional Oxford information available.</p>";
+
+        return;
+
+    }
+
+
+    Object.entries(data).forEach(
+        ([word, info]) => {
+
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "word-card";
+
+
+            let html = `
+
+                <div class="word-title">
+                    ${escapeHtml(word)}
+                </div>
+
+            `;
+
+
+            // Dictionary
+
+            const dictionary =
+                info.dictionary;
+
+
+            if (dictionary &&
+                !dictionary.error) {
+
+
+                if (
+                    dictionary.parts_of_speech &&
+                    dictionary.parts_of_speech.length
+                ) {
+
+                    html += `
+
+                        <div class="section">
+
+                            <h4>
+                                Part of Speech
+                            </h4>
+
+                            <p>
+                                ${dictionary.parts_of_speech
+                                    .map(
+                                        escapeHtml
+                                    )
+                                    .join(", ")}
+                            </p>
+
+                        </div>
+
+                    `;
+
+                }
+
+
+                if (
+                    dictionary.definitions &&
+                    dictionary.definitions.length
+                ) {
+
+                    html += `
+
+                        <div class="section">
+
+                            <h4>
+                                Definitions
+                            </h4>
+
+                            <ul>
+
+                                ${dictionary.definitions
+                                    .map(
+                                        d =>
+                                            `<li>${escapeHtml(d)}</li>`
+                                    )
+                                    .join("")}
+
+                            </ul>
+
+                        </div>
+
+                    `;
+
+                }
+
+
+                if (
+                    dictionary.examples &&
+                    dictionary.examples.length
+                ) {
+
+                    html += `
+
+                        <div class="section">
+
+                            <h4>
+                                Examples
+                            </h4>
+
+                            <ul>
+
+                                ${dictionary.examples
+                                    .map(
+                                        e =>
+                                            `<li>${escapeHtml(e)}</li>`
+                                    )
+                                    .join("")}
+
+                            </ul>
+
+                        </div>
+
+                    `;
+
+                }
+
+
+                if (
+                    dictionary.pronunciation &&
+                    dictionary.pronunciation.length
+                ) {
+
+                    html += `
+
+                        <div class="section">
+
+                            <h4>
+                                Pronunciation
+                            </h4>
+
+                            <p>
+                                ${dictionary.pronunciation
+                                    .map(
+                                        escapeHtml
+                                    )
+                                    .join(", ")}
+                            </p>
+
+                        </div>
+
+                    `;
+
+                }
+
+            }
+
+
+            card.innerHTML =
+                html;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+// ==========================================================
+// CLEAR
+// ==========================================================
+
+function clearAll() {
+
+
+    document
+        .getElementById("sentence")
+        .value = "";
+
+
+    document
+        .getElementById("results")
+        .style.display = "none";
+
+
+    hideError();
+
+}
+
+
+// ==========================================================
+// LOADING
+// ==========================================================
+
+function showLoading() {
+
+    document
+        .getElementById("loading")
+        .style.display = "block";
+
+}
+
+
+function hideLoading() {
+
+    document
+        .getElementById("loading")
+        .style.display = "none";
+
+}
+
+
+// ==========================================================
+// ERROR
+// ==========================================================
+
+function showError(message) {
+
+    const error =
+        document.getElementById(
+            "error"
+        );
+
+    error.innerText =
+        message;
+
+    error.style.display =
+        "block";
+
+}
+
+
+function hideError() {
+
+    document
+        .getElementById("error")
+        .style.display =
+            "none";
+
+}
+
+
+// ==========================================================
+// SECURITY
+// ==========================================================
+
+function escapeHtml(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+    div.textContent =
+        text;
+
+    return div.innerHTML;
+
+}
+
+
+</script>
+
+
+</body>
+
+</html>
+
